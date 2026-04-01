@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chatbot Feedback</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px 60px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .logo {
+      display: block;
+      height: 36px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 5px;
+    }
+
+    .field { margin-bottom: 20px; }
+
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      color: #111827;
+      background: #fff;
+      transition: border-color .15s;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+    }
+
+    textarea { resize: vertical; min-height: 120px; }
+
+    /* Chat ID validation states */
+    #chatId.valid   { border-color: #16a34a; }
+    #chatId.invalid { border-color: #dc2626; }
+
+    .chat-id-status {
+      font-size: 0.78rem;
+      margin-top: 5px;
+      min-height: 18px;
+    }
+    .chat-id-status.ok  { color: #16a34a; }
+    .chat-id-status.err { color: #dc2626; }
+    .chat-id-status.checking { color: #6b7280; }
+
+    /* Screenshot upload */
+    .upload-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      position: relative;
+    }
+    .upload-area:hover { border-color: #4f46e5; background: #f5f3ff; }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 2rem; margin-bottom: 6px; }
+    .upload-text { font-size: 0.85rem; color: #6b7280; }
+    .upload-text strong { color: #4f46e5; }
+
+    #preview-wrap { margin-top: 12px; display: none; }
+    #preview-wrap img {
+      max-width: 100%; max-height: 220px; border-radius: 6px;
+      border: 1.5px solid #e5e7eb;
+    }
+    .remove-btn {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: #dc2626;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+    }
+
+    /* Submit button */
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+      margin-top: 8px;
+    }
+    .btn:hover:not(:disabled) { background: #4338ca; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* Toast messages */
+    #toast {
+      display: none;
+      margin-top: 18px;
+      padding: 13px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    #toast.success { background: #f0fdf4; color: #15803d; border: 1.5px solid #bbf7d0; }
+    #toast.error   { background: #fef2f2; color: #b91c1c; border: 1.5px solid #fecaca; }
+
+    .required { color: #dc2626; }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Replace src with your logo path if hosting alongside a logo file -->
+  <!-- <img src="logo-dark.png" alt="Downing" class="logo" /> -->
+
+  <h1>Chatbot Feedback</h1>
+  <p class="subtitle">Found an issue or have a suggestion? Submit it here. One report per chat session.</p>
+
+  <form id="feedback-form" novalidate>
+
+    <!-- Name -->
+    <div class="field">
+      <label for="name">Your Name <span class="required">*</span></label>
+      <select id="name" name="name" required>
+        <option value="" disabled selected>Select your name…</option>
+        <!-- ✏️  UPDATE THIS LIST with your team members -->
+        <option>Alice Johnson</option>
+        <option>Bob Smith</option>
+        <option>Charlie Davies</option>
+        <option>Diana Lee</option>
+        <option>Edward Brown</option>
+      </select>
+    </div>
+
+    <!-- Chat Session ID -->
+    <div class="field">
+      <label for="chatId">Chat Session ID <span class="required">*</span></label>
+      <input
+        type="text"
+        id="chatId"
+        name="chatId"
+        placeholder="e.g. abc-12345"
+        autocomplete="off"
+        required
+      />
+      <div class="chat-id-status" id="chatIdStatus"></div>
+    </div>
+
+    <!-- Feedback -->
+    <div class="field">
+      <label for="feedback">Feedback <span class="required">*</span></label>
+      <textarea
+        id="feedback"
+        name="feedback"
+        placeholder="Describe the issue or suggestion. What did the chatbot do? What did you expect?"
+        required
+      ></textarea>
+    </div>
+
+    <!-- Screenshot -->
+    <div class="field">
+      <label>Screenshot <span style="color:#6b7280;font-weight:400">(optional)</span></label>
+      <div class="upload-area" id="upload-area">
+        <input type="file" id="screenshot" accept="image/*" />
+        <div class="upload-icon">📎</div>
+        <div class="upload-text"><strong>Click to upload</strong> or drag &amp; drop</div>
+        <div class="upload-text" style="margin-top:3px">PNG, JPG, GIF, WebP</div>
+      </div>
+      <div id="preview-wrap">
+        <img id="preview-img" src="" alt="Screenshot preview" />
+        <br />
+        <button type="button" class="remove-btn" id="remove-screenshot">Remove screenshot</button>
+      </div>
+    </div>
+
+    <button type="submit" class="btn" id="submit-btn">Submit Feedback</button>
+    <div id="toast"></div>
+
+  </form>
+</div>
+
+<script>
+  // ============================================================
+  // ✏️  PASTE YOUR APPS SCRIPT WEB APP URL HERE
+  // ============================================================
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx7EdlVll1dm5hkHGUrC_iYz0_MroXeOs7gqS4Q2zXiXrdbsCCYsMlI2QdooZDujZ6R/exec';
+  // ============================================================
+
+  const form           = document.getElementById('feedback-form');
+  const chatIdInput    = document.getElementById('chatId');
+  const chatIdStatus   = document.getElementById('chatIdStatus');
+  const screenshotInput= document.getElementById('screenshot');
+  const previewWrap    = document.getElementById('preview-wrap');
+  const previewImg     = document.getElementById('preview-img');
+  const removeBtn      = document.getElementById('remove-screenshot');
+  const submitBtn      = document.getElementById('submit-btn');
+  const toast          = document.getElementById('toast');
+
+  let screenshotDataUrl  = null;
+  let screenshotFilename = null;
+  let chatIdValid        = null; // null = unchecked, true = ok, false = duplicate
+  let checkTimer         = null;
+
+  // ----------------------------------------------------------
+  // Chat ID duplicate check (debounced, 600ms after typing stops)
+  // ----------------------------------------------------------
+  chatIdInput.addEventListener('input', () => {
+    const val = chatIdInput.value.trim();
+    chatIdInput.classList.remove('valid', 'invalid');
+    chatIdStatus.className = 'chat-id-status';
+    chatIdStatus.textContent = '';
+    chatIdValid = null;
+    clearTimeout(checkTimer);
+
+    if (!val) return;
+
+    chatIdStatus.className = 'chat-id-status checking';
+    chatIdStatus.textContent = 'Checking…';
+
+    checkTimer = setTimeout(() => checkChatId(val), 600);
+  });
+
+  async function checkChatId(id) {
+    try {
+      const url = `${APPS_SCRIPT_URL}?action=check&chatId=${encodeURIComponent(id)}`;
+      const res  = await fetch(url);
+      const data = await res.json();
+
+      if (data.exists) {
+        chatIdInput.classList.add('invalid');
+        chatIdStatus.className = 'chat-id-status err';
+        chatIdStatus.textContent = '✗ Feedback for this Chat Session ID has already been submitted.';
+        chatIdValid = false;
+      } else {
+        chatIdInput.classList.add('valid');
+        chatIdStatus.className = 'chat-id-status ok';
+        chatIdStatus.textContent = '✓ Chat Session ID is available.';
+        chatIdValid = true;
+      }
+    } catch {
+      chatIdStatus.className = 'chat-id-status checking';
+      chatIdStatus.textContent = 'Could not verify — will check on submit.';
+      chatIdValid = null;
+    }
+  }
+
+  // ----------------------------------------------------------
+  // Screenshot preview
+  // ----------------------------------------------------------
+  screenshotInput.addEventListener('change', () => {
+    const file = screenshotInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      screenshotDataUrl  = e.target.result;
+      screenshotFilename = file.name;
+      previewImg.src     = screenshotDataUrl;
+      previewWrap.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  removeBtn.addEventListener('click', () => {
+    screenshotDataUrl      = null;
+    screenshotFilename     = null;
+    screenshotInput.value  = '';
+    previewImg.src         = '';
+    previewWrap.style.display = 'none';
+  });
+
+  // Drag and drop
+  const uploadArea = document.getElementById('upload-area');
+  uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor = '#4f46e5'; });
+  uploadArea.addEventListener('dragleave',  () => { uploadArea.style.borderColor = ''; });
+  uploadArea.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadArea.style.borderColor = '';
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      screenshotInput.files = dt.files;
+      screenshotInput.dispatchEvent(new Event('change'));
+    }
+  });
+
+  // ----------------------------------------------------------
+  // Form submit
+  // ----------------------------------------------------------
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    hideToast();
+
+    const name     = document.getElementById('name').value;
+    const chatId   = chatIdInput.value.trim();
+    const feedback = document.getElementById('feedback').value.trim();
+
+    // Basic validation
+    if (!name)     return showToast('error', 'Please select your name.');
+    if (!chatId)   return showToast('error', 'Please enter the Chat Session ID.');
+    if (!feedback) return showToast('error', 'Please enter your feedback.');
+    if (chatIdValid === false) return showToast('error', 'This Chat Session ID has already been submitted.');
+
+    submitBtn.disabled   = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      const payload = { name, chatId, feedback, screenshot: screenshotDataUrl, screenshotName: screenshotFilename };
+
+      const res  = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body:   JSON.stringify(payload)
+        // No Content-Type header — avoids CORS preflight for Apps Script
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        showToast('success', '✓ Feedback submitted successfully! Thank you.');
+        form.reset();
+        screenshotDataUrl = null;
+        previewWrap.style.display = 'none';
+        chatIdInput.classList.remove('valid', 'invalid');
+        chatIdStatus.textContent = '';
+        chatIdValid = null;
+      } else {
+        showToast('error', data.error || 'Submission failed. Please try again.');
+      }
+    } catch {
+      showToast('error', 'Network error. Please check your connection and try again.');
+    } finally {
+      submitBtn.disabled   = false;
+      submitBtn.textContent = 'Submit Feedback';
+    }
+  });
+
+  // ----------------------------------------------------------
+  // Toast helpers
+  // ----------------------------------------------------------
+  function showToast(type, msg) {
+    toast.className    = type;
+    toast.textContent  = msg;
+    toast.style.display = 'block';
+    toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function hideToast() {
+    toast.style.display = 'none';
+  }
+</script>
+</body>
+</html>
