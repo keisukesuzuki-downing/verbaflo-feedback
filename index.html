@@ -364,6 +364,30 @@
   }
 
   // ----------------------------------------------------------
+  // Category colour coding
+  // ----------------------------------------------------------
+  const NEGATIVE_CATEGORIES = ['Incorrect information', 'Repetitive responses', 'Not answering properly', 'Failed to escalate', 'Other'];
+  const categorySelect = document.getElementById('category');
+
+  function updateCategoryColour() {
+    const val = categorySelect.value;
+    categorySelect.style.background = '';
+    categorySelect.style.color = '';
+    categorySelect.style.borderColor = '';
+    if (val === 'No issues') {
+      categorySelect.style.background = '#f0fdf4';
+      categorySelect.style.borderColor = '#86efac';
+      categorySelect.style.color = '#15803d';
+    } else if (NEGATIVE_CATEGORIES.includes(val)) {
+      categorySelect.style.background = '#fef2f2';
+      categorySelect.style.borderColor = '#fca5a5';
+      categorySelect.style.color = '#b91c1c';
+    }
+  }
+
+  categorySelect.addEventListener('change', updateCategoryColour);
+
+  // ----------------------------------------------------------
   // Screenshot preview
   // ----------------------------------------------------------
   screenshotInput.addEventListener('change', () => {
@@ -439,6 +463,9 @@
         saveNewName(name);
         showToast('success', '✓ Feedback submitted successfully! Thank you.');
         form.reset();
+        categorySelect.style.background = '';
+        categorySelect.style.borderColor = '';
+        categorySelect.style.color = '';
         screenshotDataUrl = null;
         previewWrap.style.display = 'none';
         chatIdInput.classList.remove('valid', 'invalid');
