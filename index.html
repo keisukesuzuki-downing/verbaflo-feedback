@@ -210,6 +210,19 @@
       <div class="chat-id-status" id="chatIdStatus"></div>
     </div>
 
+    <!-- Category -->
+    <div class="field">
+      <label for="category">Issue Category <span style="color:#6b7280;font-weight:400">(optional)</span></label>
+      <select id="category" name="category">
+        <option value="" selected>Select a category…</option>
+        <option value="Incorrect information">Incorrect information — AI gave wrong or inaccurate answers</option>
+        <option value="Repetitive responses">Repetitive responses — AI kept looping or using the same templates</option>
+        <option value="Not answering properly">Not answering properly — AI avoided or missed the actual question</option>
+        <option value="Failed to escalate">Failed to escalate — AI should have handed off to a human</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
     <!-- Feedback -->
     <div class="field">
       <label for="feedback">Feedback <span class="required">*</span></label>
@@ -249,6 +262,47 @@
   // ============================================================
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx7EdlVll1dm5hkHGUrC_iYz0_MroXeOs7gqS4Q2zXiXrdbsCCYsMlI2QdooZDujZ6R/exec';
   // ============================================================
+
+  // ----------------------------------------------------------
+  // Saved names (localStorage) — persist custom names across sessions
+  // ----------------------------------------------------------
+  const KNOWN_NAMES = [
+    'Catherine Hollywood','Hannah Duffy','Harrison Ramsden','Ivy Liu',
+    'Jade Mallia','Jemma Curzon','Keisuke Suzuki','Lauren Sergeant',
+    'Lynne Doyle','Michelle Winrow','Rebecca Maher','Sarah Duckworth','Yuqi Chen'
+  ];
+
+  function getSavedNames() {
+    try { return JSON.parse(localStorage.getItem('feedback_saved_names') || '[]'); }
+    catch { return []; }
+  }
+
+  function saveNewName(name) {
+    if (!name || KNOWN_NAMES.includes(name)) return;
+    const saved = getSavedNames();
+    if (saved.includes(name)) return;
+    saved.push(name);
+    saved.sort((a, b) => a.localeCompare(b));
+    localStorage.setItem('feedback_saved_names', JSON.stringify(saved));
+    addNameToDatalist(name);
+  }
+
+  function addNameToDatalist(name) {
+    const list = document.getElementById('name-list');
+    // Avoid duplicates in the datalist
+    const existing = Array.from(list.options).map(o => o.value);
+    if (existing.includes(name)) return;
+    const opt = document.createElement('option');
+    opt.value = name;
+    list.appendChild(opt);
+    // Re-sort datalist options alphabetically
+    const sorted = Array.from(list.options).sort((a, b) => a.value.localeCompare(b.value));
+    list.innerHTML = '';
+    sorted.forEach(o => list.appendChild(o));
+  }
+
+  // Load any previously saved custom names into the datalist on page load
+  getSavedNames().forEach(addNameToDatalist);
 
   const form           = document.getElementById('feedback-form');
   const chatIdInput    = document.getElementById('chatId');
@@ -356,8 +410,9 @@
     e.preventDefault();
     hideToast();
 
-    const name     = document.getElementById('name').value;
+    const name     = document.getElementById('name').value.trim();
     const chatId   = chatIdInput.value.trim();
+    const category = document.getElementById('category').value;
     const feedback = document.getElementById('feedback').value.trim();
 
     // Basic validation
@@ -370,7 +425,7 @@
     submitBtn.textContent = 'Submitting…';
 
     try {
-      const payload = { name, chatId, feedback, screenshot: screenshotDataUrl, screenshotName: screenshotFilename };
+      const payload = { name, chatId, category, feedback, screenshot: screenshotDataUrl, screenshotName: screenshotFilename };
 
       const res  = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -380,6 +435,7 @@
       const data = await res.json();
 
       if (data.success) {
+        saveNewName(name);
         showToast('success', '✓ Feedback submitted successfully! Thank you.');
         form.reset();
         screenshotDataUrl = null;
