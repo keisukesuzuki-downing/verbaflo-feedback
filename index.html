@@ -3,13 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chatbot Feedback</title>
+  <title>Chatbot Feedback — Downing Students</title>
   <style>
+    :root {
+      --brand-black:  #0A1F1A;
+      --brand-green:  #177654;
+      --brand-offwhite: #FCF3EA;
+      --brand-gold:   #F9B023;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f4f5f7;
+      background: var(--brand-offwhite);
       min-height: 100vh;
       display: flex;
       align-items: flex-start;
@@ -20,7 +27,7 @@
     .card {
       background: #fff;
       border-radius: 12px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+      box-shadow: 0 2px 20px rgba(10,31,26,0.12);
       padding: 40px 36px;
       width: 100%;
       max-width: 560px;
@@ -28,14 +35,15 @@
 
     .logo {
       display: block;
-      height: 36px;
-      margin-bottom: 24px;
+      height: 44px;
+      width: auto;
+      margin-bottom: 28px;
     }
 
     h1 {
       font-size: 1.35rem;
       font-weight: 700;
-      color: #1a1a2e;
+      color: var(--brand-black);
       margin-bottom: 6px;
     }
 
@@ -49,7 +57,7 @@
       display: block;
       font-size: 0.8125rem;
       font-weight: 600;
-      color: #374151;
+      color: var(--brand-black);
       margin-bottom: 5px;
     }
 
@@ -72,8 +80,8 @@
     input[type="text"]:focus,
     select:focus,
     textarea:focus {
-      border-color: #4f46e5;
-      box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+      border-color: var(--brand-green);
+      box-shadow: 0 0 0 3px rgba(13,35,24,0.10);
     }
 
     textarea { resize: vertical; min-height: 120px; }
@@ -101,13 +109,13 @@
       transition: border-color .15s, background .15s;
       position: relative;
     }
-    .upload-area:hover { border-color: #4f46e5; background: #f5f3ff; }
+    .upload-area:hover { border-color: var(--brand-green); background: var(--brand-offwhite); }
     .upload-area input[type="file"] {
       position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
     .upload-icon { font-size: 2rem; margin-bottom: 6px; }
     .upload-text { font-size: 0.85rem; color: #6b7280; }
-    .upload-text strong { color: #4f46e5; }
+    .upload-text strong { color: var(--brand-green); }
 
     #preview-wrap { margin-top: 12px; display: none; }
     #preview-wrap img {
@@ -129,7 +137,7 @@
     .btn {
       width: 100%;
       padding: 13px;
-      background: #4f46e5;
+      background: var(--brand-black);
       color: #fff;
       border: none;
       border-radius: 8px;
@@ -139,7 +147,7 @@
       transition: background .15s, opacity .15s;
       margin-top: 8px;
     }
-    .btn:hover:not(:disabled) { background: #4338ca; }
+    .btn:hover:not(:disabled) { background: var(--brand-green); }
     .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
     /* Toast messages */
@@ -160,8 +168,7 @@
 <body>
 <div class="card">
 
-  <!-- Replace src with your logo path if hosting alongside a logo file -->
-  <!-- <img src="logo-dark.png" alt="Downing" class="logo" /> -->
+  <img src="logo.png" alt="Downing Students" class="logo" />
 
   <h1>Chatbot Feedback</h1>
   <p class="subtitle">Found an issue or have a suggestion? Submit it here. One report per chat session.</p>
