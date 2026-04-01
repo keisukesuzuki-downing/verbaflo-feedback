@@ -163,6 +163,53 @@
     #toast.error   { background: #fef2f2; color: #b91c1c; border: 1.5px solid #fecaca; }
 
     .required { color: #dc2626; }
+
+    /* Custom category dropdown */
+    .custom-select { position: relative; user-select: none; }
+    .custom-select__trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, color .15s;
+    }
+    .custom-select__trigger:focus { outline: none; border-color: var(--brand-green); box-shadow: 0 0 0 3px rgba(13,35,24,0.10); }
+    .custom-select__trigger.placeholder { color: #9ca3af; }
+    .custom-select__arrow { font-size: 0.7rem; color: #6b7280; margin-left: 8px; flex-shrink: 0; transition: transform .15s; }
+    .custom-select.open .custom-select__arrow { transform: rotate(180deg); }
+    .custom-select__options {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #fff;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    }
+    .custom-select.open .custom-select__options { display: block; }
+    .custom-select__option {
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: filter .1s;
+      border-left: 4px solid transparent;
+    }
+    .custom-select__option:hover { filter: brightness(0.95); }
+    .custom-select__option.placeholder-opt { color: #9ca3af; }
+    .custom-select__option.opt-neutral  { background: #fff; color: #374151; }
+    .custom-select__option.opt-positive { background: #f0fdf4; color: #15803d; border-left-color: #16a34a; }
+    .custom-select__option.opt-negative { background: #fef2f2; color: #b91c1c; border-left-color: #dc2626; }
+    /* Trigger colours when selected */
+    .custom-select__trigger.positive { background: #f0fdf4; border-color: #86efac; color: #15803d; }
+    .custom-select__trigger.negative { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
   </style>
 </head>
 <body>
@@ -212,16 +259,23 @@
 
     <!-- Category -->
     <div class="field">
-      <label for="category">Issue Category</label>
-      <select id="category" name="category">
-        <option value="" selected>Select a category…</option>
-        <option value="No issues">No issues — chatbot performed well</option>
-        <option value="Incorrect information">Incorrect information — AI gave wrong or inaccurate answers</option>
-        <option value="Repetitive responses">Repetitive responses — AI kept looping or using the same templates</option>
-        <option value="Not answering properly">Not answering properly — AI avoided or missed the actual question</option>
-        <option value="Failed to escalate">Failed to escalate — AI should have handed off to a human</option>
-        <option value="Other">Other</option>
-      </select>
+      <label>Issue Category</label>
+      <input type="hidden" id="category" name="category" value="" />
+      <div class="custom-select" id="categorySelect">
+        <div class="custom-select__trigger placeholder" tabindex="0" id="categoryTrigger">
+          <span id="categoryLabel">Select a category…</span>
+          <span class="custom-select__arrow">▼</span>
+        </div>
+        <div class="custom-select__options" id="categoryOptions">
+          <div class="custom-select__option placeholder-opt" data-value="">Select a category…</div>
+          <div class="custom-select__option opt-positive" data-value="No issues">✓ No issues — chatbot performed well</div>
+          <div class="custom-select__option opt-negative" data-value="Incorrect information">✗ Incorrect information — AI gave wrong or inaccurate answers</div>
+          <div class="custom-select__option opt-negative" data-value="Repetitive responses">✗ Repetitive responses — AI kept looping or using the same templates</div>
+          <div class="custom-select__option opt-negative" data-value="Not answering properly">✗ Not answering properly — AI avoided or missed the actual question</div>
+          <div class="custom-select__option opt-negative" data-value="Failed to escalate">✗ Failed to escalate — AI should have handed off to a human</div>
+          <div class="custom-select__option opt-neutral" data-value="Other">Other</div>
+        </div>
+      </div>
     </div>
 
     <!-- Feedback -->
@@ -364,28 +418,49 @@
   }
 
   // ----------------------------------------------------------
-  // Category colour coding
+  // Custom category dropdown
   // ----------------------------------------------------------
-  const NEGATIVE_CATEGORIES = ['Incorrect information', 'Repetitive responses', 'Not answering properly', 'Failed to escalate', 'Other'];
-  const categorySelect = document.getElementById('category');
+  const categoryInput   = document.getElementById('category');
+  const categoryWrap    = document.getElementById('categorySelect');
+  const categoryTrigger = document.getElementById('categoryTrigger');
+  const categoryLabel   = document.getElementById('categoryLabel');
+  const categoryOptions = document.getElementById('categoryOptions');
 
-  function updateCategoryColour() {
-    const val = categorySelect.value;
-    categorySelect.style.background = '';
-    categorySelect.style.color = '';
-    categorySelect.style.borderColor = '';
-    if (val === 'No issues') {
-      categorySelect.style.background = '#f0fdf4';
-      categorySelect.style.borderColor = '#86efac';
-      categorySelect.style.color = '#15803d';
-    } else if (NEGATIVE_CATEGORIES.includes(val)) {
-      categorySelect.style.background = '#fef2f2';
-      categorySelect.style.borderColor = '#fca5a5';
-      categorySelect.style.color = '#b91c1c';
-    }
+  categoryTrigger.addEventListener('click', () => {
+    categoryWrap.classList.toggle('open');
+  });
+  categoryTrigger.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); categoryWrap.classList.toggle('open'); }
+    if (e.key === 'Escape') categoryWrap.classList.remove('open');
+  });
+  document.addEventListener('click', e => {
+    if (!categoryWrap.contains(e.target)) categoryWrap.classList.remove('open');
+  });
+
+  categoryOptions.querySelectorAll('.custom-select__option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const val = opt.dataset.value;
+      categoryInput.value = val;
+      categoryLabel.textContent = opt.textContent;
+      categoryTrigger.classList.remove('placeholder', 'positive', 'negative');
+      if (!val) {
+        categoryLabel.textContent = 'Select a category…';
+        categoryTrigger.classList.add('placeholder');
+      } else if (opt.classList.contains('opt-positive')) {
+        categoryTrigger.classList.add('positive');
+      } else if (opt.classList.contains('opt-negative')) {
+        categoryTrigger.classList.add('negative');
+      }
+      categoryWrap.classList.remove('open');
+    });
+  });
+
+  function resetCategory() {
+    categoryInput.value = '';
+    categoryLabel.textContent = 'Select a category…';
+    categoryTrigger.classList.remove('positive', 'negative');
+    categoryTrigger.classList.add('placeholder');
   }
-
-  categorySelect.addEventListener('change', updateCategoryColour);
 
   // ----------------------------------------------------------
   // Screenshot preview
@@ -463,9 +538,7 @@
         saveNewName(name);
         showToast('success', '✓ Feedback submitted successfully! Thank you.');
         form.reset();
-        categorySelect.style.background = '';
-        categorySelect.style.borderColor = '';
-        categorySelect.style.color = '';
+        resetCategory();
         screenshotDataUrl = null;
         previewWrap.style.display = 'none';
         chatIdInput.classList.remove('valid', 'invalid');
