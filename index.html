@@ -171,15 +171,22 @@
     <!-- Name -->
     <div class="field">
       <label for="name">Your Name <span class="required">*</span></label>
-      <select id="name" name="name" required>
-        <option value="" disabled selected>Select your name…</option>
-        <!-- ✏️  UPDATE THIS LIST with your team members -->
-        <option>Alice Johnson</option>
-        <option>Bob Smith</option>
-        <option>Charlie Davies</option>
-        <option>Diana Lee</option>
-        <option>Edward Brown</option>
-      </select>
+      <input type="text" id="name" name="name" list="name-list" placeholder="Select or type your name…" autocomplete="off" required />
+      <datalist id="name-list">
+        <option>Catherine Hollywood</option>
+        <option>Hannah Duffy</option>
+        <option>Harrison Ramsden</option>
+        <option>Ivy Liu</option>
+        <option>Jade Mallia</option>
+        <option>Jemma Curzon</option>
+        <option>Keisuke Suzuki</option>
+        <option>Lauren Sergeant</option>
+        <option>Lynne Doyle</option>
+        <option>Michelle Winrow</option>
+        <option>Rebecca Maher</option>
+        <option>Sarah Duckworth</option>
+        <option>Yuqi Chen</option>
+      </datalist>
     </div>
 
     <!-- Chat Session ID -->
