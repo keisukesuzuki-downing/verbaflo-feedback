@@ -208,6 +208,20 @@
 
   <form id="feedback-form" novalidate>
 
+    <!-- Chat Session ID -->
+    <div class="field">
+      <label for="chatId">Chat Session ID <span class="required">*</span></label>
+      <input
+        type="text"
+        id="chatId"
+        name="chatId"
+        placeholder="e.g. 275532185"
+        autocomplete="off"
+        required
+      />
+      <div class="chat-id-status" id="chatIdStatus"></div>
+    </div>
+
     <!-- Name -->
     <div class="field">
       <label for="name">Your Name <span class="required">*</span></label>
@@ -227,20 +241,6 @@
         <option>Sarah Duckworth</option>
         <option>Yuqi Chen</option>
       </datalist>
-    </div>
-
-    <!-- Chat Session ID -->
-    <div class="field">
-      <label for="chatId">Chat Session ID <span class="required">*</span></label>
-      <input
-        type="text"
-        id="chatId"
-        name="chatId"
-        placeholder="e.g. 275532185"
-        autocomplete="off"
-        required
-      />
-      <div class="chat-id-status" id="chatIdStatus"></div>
     </div>
 
     <!-- Category -->
