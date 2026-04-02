@@ -164,52 +164,38 @@
 
     .required { color: #dc2626; }
 
-    /* Custom category dropdown */
-    .custom-select { position: relative; user-select: none; }
-    .custom-select__trigger {
+    /* Category checkboxes */
+    .category-group { display: flex; flex-direction: column; gap: 6px; }
+    .category-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      border: 1.5px solid #d1d5db;
+      gap: 10px;
+      padding: 9px 12px;
       border-radius: 8px;
-      font-size: 0.9375rem;
-      background: #fff;
+      border: 1.5px solid transparent;
       cursor: pointer;
-      transition: border-color .15s, background .15s, color .15s;
-    }
-    .custom-select__trigger:focus { outline: none; border-color: var(--brand-green); box-shadow: 0 0 0 3px rgba(13,35,24,0.10); }
-    .custom-select__trigger.placeholder { color: #9ca3af; }
-    .custom-select__arrow { font-size: 0.7rem; color: #6b7280; margin-left: 8px; flex-shrink: 0; transition: transform .15s; }
-    .custom-select.open .custom-select__arrow { transform: rotate(180deg); }
-    .custom-select__options {
-      display: none;
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0; right: 0;
-      background: #fff;
-      border: 1.5px solid #d1d5db;
-      border-radius: 8px;
-      overflow: hidden;
-      z-index: 100;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-    }
-    .custom-select.open .custom-select__options { display: block; }
-    .custom-select__option {
-      padding: 10px 14px;
       font-size: 0.9rem;
-      cursor: pointer;
-      transition: filter .1s;
-      border-left: 4px solid transparent;
+      font-weight: 400;
+      transition: border-color .1s;
+      margin-bottom: 0;
+      color: inherit;
     }
-    .custom-select__option:hover { filter: brightness(0.95); }
-    .custom-select__option.placeholder-opt { color: #9ca3af; }
-    .custom-select__option.opt-neutral  { background: #fff; color: #374151; }
-    .custom-select__option.opt-positive { background: #f0fdf4; color: #15803d; border-left-color: #16a34a; }
-    .custom-select__option.opt-negative { background: #fef2f2; color: #b91c1c; border-left-color: #dc2626; }
-    /* Trigger colours when selected */
-    .custom-select__trigger.positive { background: #f0fdf4; border-color: #86efac; color: #15803d; }
-    .custom-select__trigger.negative { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+    .category-item input[type="checkbox"] {
+      width: 16px; height: 16px; flex-shrink: 0;
+      cursor: pointer; margin: 0; padding: 0;
+      border: none; background: none; outline: none;
+    }
+    .category-item.opt-positive { background: #f0fdf4; border-color: #d1fae5; color: #15803d; }
+    .category-item.opt-positive:hover { border-color: #86efac; }
+    .category-item.opt-positive input { accent-color: #16a34a; }
+    .category-item.opt-negative { background: #fef2f2; border-color: #fee2e2; color: #b91c1c; }
+    .category-item.opt-negative:hover { border-color: #fca5a5; }
+    .category-item.opt-negative input { accent-color: #dc2626; }
+    .category-item.opt-neutral  { background: #f9fafb; border-color: #e5e7eb; color: #374151; }
+    .category-item.opt-neutral:hover  { border-color: #d1d5db; }
+    .category-item.opt-positive:has(input:checked) { border-color: #16a34a; }
+    .category-item.opt-negative:has(input:checked) { border-color: #dc2626; }
+    .category-item.opt-neutral:has(input:checked)  { border-color: #6b7280; }
   </style>
 </head>
 <body>
@@ -260,22 +246,35 @@
     <!-- Category -->
     <div class="field">
       <label>Issue Category</label>
-      <input type="hidden" id="category" name="category" value="" />
-      <div class="custom-select" id="categorySelect">
-        <div class="custom-select__trigger placeholder" tabindex="0" id="categoryTrigger">
-          <span id="categoryLabel">Select a category…</span>
-          <span class="custom-select__arrow">▼</span>
-        </div>
-        <div class="custom-select__options" id="categoryOptions">
-          <div class="custom-select__option placeholder-opt" data-value="">Select a category…</div>
-          <div class="custom-select__option opt-positive" data-value="No issues">✓ No issues — chatbot performed well</div>
-          <div class="custom-select__option opt-negative" data-value="Incorrect information">✗ Incorrect information — AI gave wrong or inaccurate answers</div>
-          <div class="custom-select__option opt-negative" data-value="Repetitive responses">✗ Repetitive responses — AI kept looping or using the same templates</div>
-          <div class="custom-select__option opt-negative" data-value="Not answering properly">✗ Not answering properly — AI avoided or missed the actual question</div>
-          <div class="custom-select__option opt-negative" data-value="Failed to escalate">✗ Failed to escalate — AI should have handed off to a human</div>
-          <div class="custom-select__option opt-negative" data-value="Conversation ended prematurely">✗ Conversation ended early — We asked for information and conversation ended</div>
-          <div class="custom-select__option opt-neutral" data-value="Other">Other</div>
-        </div>
+      <div class="category-group" id="categoryGroup">
+        <label class="category-item opt-positive">
+          <input type="checkbox" value="No issues" id="cat_no_issues" />
+          ✓ No issues — chatbot performed well
+        </label>
+        <label class="category-item opt-negative">
+          <input type="checkbox" value="Incorrect information" />
+          ✗ Incorrect information — AI gave wrong or inaccurate answers
+        </label>
+        <label class="category-item opt-negative">
+          <input type="checkbox" value="Repetitive responses" />
+          ✗ Repetitive responses — AI kept looping or using the same templates
+        </label>
+        <label class="category-item opt-negative">
+          <input type="checkbox" value="Not answering properly" />
+          ✗ Not answering properly — AI avoided or missed the actual question
+        </label>
+        <label class="category-item opt-negative">
+          <input type="checkbox" value="Failed to escalate" />
+          ✗ Failed to escalate — AI should have handed off to a human
+        </label>
+        <label class="category-item opt-negative">
+          <input type="checkbox" value="Information captured too early" />
+          ✗ Information captured too early — conversation dropped prematurely
+        </label>
+        <label class="category-item opt-neutral">
+          <input type="checkbox" value="Other" />
+          Other
+        </label>
       </div>
     </div>
 
@@ -419,48 +418,25 @@
   }
 
   // ----------------------------------------------------------
-  // Custom category dropdown
+  // Category checkboxes — No issues deselects all others
   // ----------------------------------------------------------
-  const categoryInput   = document.getElementById('category');
-  const categoryWrap    = document.getElementById('categorySelect');
-  const categoryTrigger = document.getElementById('categoryTrigger');
-  const categoryLabel   = document.getElementById('categoryLabel');
-  const categoryOptions = document.getElementById('categoryOptions');
+  const noIssuesCb = document.getElementById('cat_no_issues');
+  const allCatCbs  = document.querySelectorAll('#categoryGroup input[type="checkbox"]');
 
-  categoryTrigger.addEventListener('click', () => {
-    categoryWrap.classList.toggle('open');
+  noIssuesCb.addEventListener('change', () => {
+    if (noIssuesCb.checked) allCatCbs.forEach(cb => { if (cb !== noIssuesCb) cb.checked = false; });
   });
-  categoryTrigger.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); categoryWrap.classList.toggle('open'); }
-    if (e.key === 'Escape') categoryWrap.classList.remove('open');
-  });
-  document.addEventListener('click', e => {
-    if (!categoryWrap.contains(e.target)) categoryWrap.classList.remove('open');
+  allCatCbs.forEach(cb => {
+    if (cb === noIssuesCb) return;
+    cb.addEventListener('change', () => { if (cb.checked) noIssuesCb.checked = false; });
   });
 
-  categoryOptions.querySelectorAll('.custom-select__option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      const val = opt.dataset.value;
-      categoryInput.value = val;
-      categoryLabel.textContent = opt.textContent;
-      categoryTrigger.classList.remove('placeholder', 'positive', 'negative');
-      if (!val) {
-        categoryLabel.textContent = 'Select a category…';
-        categoryTrigger.classList.add('placeholder');
-      } else if (opt.classList.contains('opt-positive')) {
-        categoryTrigger.classList.add('positive');
-      } else if (opt.classList.contains('opt-negative')) {
-        categoryTrigger.classList.add('negative');
-      }
-      categoryWrap.classList.remove('open');
-    });
-  });
+  function getSelectedCategories() {
+    return Array.from(allCatCbs).filter(cb => cb.checked).map(cb => cb.value);
+  }
 
   function resetCategory() {
-    categoryInput.value = '';
-    categoryLabel.textContent = 'Select a category…';
-    categoryTrigger.classList.remove('positive', 'negative');
-    categoryTrigger.classList.add('placeholder');
+    allCatCbs.forEach(cb => cb.checked = false);
   }
 
   // ----------------------------------------------------------
@@ -511,10 +487,10 @@
     e.preventDefault();
     hideToast();
 
-    const name     = document.getElementById('name').value.trim();
-    const chatId   = chatIdInput.value.trim();
-    const category = document.getElementById('category').value;
-    const feedback = document.getElementById('feedback').value.trim();
+    const name       = document.getElementById('name').value.trim();
+    const chatId     = chatIdInput.value.trim();
+    const categories = getSelectedCategories();
+    const feedback   = document.getElementById('feedback').value.trim();
 
     // Basic validation
     if (!name)     return showToast('error', 'Please select your name.');
@@ -526,7 +502,7 @@
     submitBtn.textContent = 'Submitting…';
 
     try {
-      const payload = { name, chatId, category, feedback, screenshot: screenshotDataUrl, screenshotName: screenshotFilename };
+      const payload = { name, chatId, categories, feedback, screenshot: screenshotDataUrl, screenshotName: screenshotFilename };
 
       const res  = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
