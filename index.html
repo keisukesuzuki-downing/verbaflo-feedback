@@ -400,10 +400,10 @@
       const data = await res.json();
 
       if (data.exists) {
-        chatIdInput.classList.add('invalid');
-        chatIdStatus.className = 'chat-id-status err';
-        chatIdStatus.textContent = '✗ Feedback for this Chat Session ID has already been submitted.';
-        chatIdValid = false;
+        chatIdInput.classList.add('valid');
+        chatIdStatus.className = 'chat-id-status checking';
+        chatIdStatus.textContent = '⚠ This chat has already been reviewed. You can still submit additional feedback.';
+        chatIdValid = true;
       } else {
         chatIdInput.classList.add('valid');
         chatIdStatus.className = 'chat-id-status ok';
@@ -496,7 +496,6 @@
     if (!name)     return showToast('error', 'Please select your name.');
     if (!chatId)   return showToast('error', 'Please enter the Chat Session ID.');
     if (!feedback) return showToast('error', 'Please enter your feedback.');
-    if (chatIdValid === false) return showToast('error', 'This Chat Session ID has already been submitted.');
 
     submitBtn.disabled   = true;
     submitBtn.textContent = 'Submitting…';
